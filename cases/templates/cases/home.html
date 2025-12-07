@@ -1,0 +1,22 @@
+{% extends 'cases/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 text-center">
+        <h1 class="display-4 mb-3">Track Your Case</h1>
+        <p class="lead text-muted mb-5">Enter your OB Number to check the status of your case instantly.</p>
+        
+        <div class="card p-4 shadow-sm">
+            <form action="{% url 'home' %}" method="GET" class="d-flex">
+                <input type="text" name="q" class="form-control form-control-lg me-2" placeholder="Enter OB Number (e.g., OB/2025/001)" required>
+                <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-search me-2"></i>Track</button>
+            </form>
+        </div>
+
+        <div class="mt-5 d-flex justify-content-center gap-3">
+            <a href="{% url 'report' %}" class="btn btn-outline-danger btn-lg"><i class="fas fa-user-secret me-2"></i>Report Anonymous Crime</a>
+            <a href="{% url 'subscribe' %}" class="btn btn-outline-secondary btn-lg"><i class="fas fa-bell me-2"></i>Get Updates</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

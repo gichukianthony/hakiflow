@@ -1,0 +1,49 @@
+{% extends 'cases/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Officer Portal - Case Management</h2>
+    <a href="{% url 'case_add' %}" class="btn btn-success"><i class="fas fa-plus me-2"></i>New Case</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>OB Number</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for case in cases %}
+                    <tr>
+                        <td><strong>{{ case.ob_number }}</strong></td>
+                        <td>{{ case.title }}</td>
+                        <td>
+                            <span class="badge bg-{% if case.status == 'judgement' %}primary{% elif case.status == 'court' %}warning{% else %}secondary{% endif %}">
+                                {{ case.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ case.created_at|date:"M d, Y" }}</td>
+                        <td>
+                            <a href="{% url 'case_detail' case.pk %}" class="btn btn-sm btn-info text-white me-1"><i class="fas fa-eye"></i></a>
+                            <a href="{% url 'case_edit' case.pk %}" class="btn btn-sm btn-warning text-white me-1"><i class="fas fa-edit"></i></a>
+                            <a href="{% url 'add_note' case.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-sticky-note"></i></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4">No cases found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'cases/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card p-4 shadow-sm">
+            <h3 class="mb-3"><i class="fas fa-bell me-2"></i>Get Case Updates</h3>
+            <p class="text-muted">Enter the OB Number and your email to receive real-time notifications.</p>
+            
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">OB Number</label>
+                    <input type="text" name="ob_number" class="form-control" placeholder="OB/2025/..." required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email" class="form-control" placeholder="name@example.com" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Subscribe</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
