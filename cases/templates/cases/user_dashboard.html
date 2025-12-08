@@ -1,0 +1,179 @@
+{% extends 'cases/base.html' %}
+
+{% block content %}
+<!-- OB NUMBER TRACK FORM -->
+<div class="row mb-4 justify-content-center">
+  <div class="col-lg-10">
+    <div class="card card-animated p-4 border-0 shadow-sm rounded-4 mb-4 bg-light-subtle">
+      <h5 class="mb-2"><i class="fas fa-search-location me-2 text-primary"></i>Track a New Case by OB Number</h5>
+      <form method="POST" class="row g-2 align-items-center mb-0">
+        {% csrf_token %}
+        <div class="col-auto flex-grow-1">
+          <input type="text" name="ob_number" class="form-control" placeholder="Type OB Number (e.g., OB/2025/002)" required>
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-primary"><i class="fas fa-search me-1"></i>Track</button>
+        </div>
+        {% if messages %}
+        <div class="col-12 mt-2">
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} py-1 mb-0 small">{{ message }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+</div>
+<!-- DASHBOARD HERO & STATS -->
+<div class="row align-items-center mb-4 g-3">
+  <div class="col-lg-9">
+    <div class="vstack gap-2 mb-2">
+      <h2 class="fw-bold mb-0">Your Case Dashboard</h2>
+      <p class="text-muted mb-1">Welcome back, {{ user.username }}! Track your progress, updates, and more.</p>
+    </div>
+    <div class="row g-3">
+      <div class="col-6 col-md-3">
+        <div class="card card-animated p-3 border-0 shadow-sm rounded-4 bg-primary bg-opacity-10 text-center">
+          <div class="text-primary mb-2"><i class="fas fa-list-ul fa-lg"></i></div>
+          <div class="fw-bold h4 mb-0">{{ case_counts.total }}</div>
+          <small class="text-muted">Total Cases</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card card-animated p-3 border-0 shadow-sm rounded-4 bg-warning bg-opacity-10 text-center">
+          <div class="text-warning mb-2"><i class="fas fa-search fa-lg"></i></div>
+          <div class="fw-bold h4 mb-0">{{ case_counts.investigation }}</div>
+          <small class="text-muted">Investigation</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card card-animated p-3 border-0 shadow-sm rounded-4 bg-info bg-opacity-10 text-center">
+          <div class="text-info mb-2"><i class="fas fa-user-secret fa-lg"></i></div>
+          <div class="fw-bold h4 mb-0">{{ case_counts.dci }}</div>
+          <small class="text-muted">DCI Stage</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card card-animated p-3 border-0 shadow-sm rounded-4 bg-primary bg-opacity-10 text-center">
+          <div class="text-primary mb-2"><i class="fas fa-balance-scale fa-lg"></i></div>
+          <div class="fw-bold h4 mb-0">{{ case_counts.court }}</div>
+          <small class="text-muted">In Court</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-3 d-flex flex-column gap-2 justify-content-end">
+    <a href="{% url 'home' %}" class="btn btn-primary shadow-sm w-100"><i class="fas fa-plus me-2"></i>Track New Case</a>
+    <a href="{% url 'subscribe' %}" class="btn btn-outline-secondary shadow-sm w-100"><i class="fas fa-bell me-2"></i>Subscribe for Updates</a>
+    <a href="{% url 'notification_management' %}" class="btn btn-outline-primary shadow-sm w-100"><i class="fas fa-bell me-2"></i>Manage Notifications</a>
+    <a href="{% url 'report' %}" class="btn btn-outline-danger shadow-sm w-100"><i class="fas fa-user-secret me-2"></i>Report Issue</a>
+    <a href="{% url 'export_user_cases' %}" class="btn btn-outline-success shadow-sm w-100"><i class="fas fa-file-csv me-2"></i>Export My Cases (CSV)</a>
+  </div>
+</div>
+<!-- CASE TABLE -->
+<div class="card card-animated shadow-lg-soft rounded-4 border-0 mt-4">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="bg-subtle-custom">
+          <tr>
+            <th class="ps-4 py-3 border-0 rounded-start-4">OB Number</th>
+            <th class="py-3 border-0">Title</th>
+            <th class="py-3 border-0">Status</th>
+            <th class="py-3 border-0">Date Reported</th>
+            <th class="pe-4 py-3 border-0 rounded-end-4 text-end">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for case in cases %}
+          <tr>
+            <td class="ps-4 fw-bold text-primary">{{ case.ob_number }}</td>
+            <td>{{ case.title }}</td>
+            <td>
+              <span class="badge bg-opacity-10 px-3 py-2 rounded-pill
+                  {% if case.status == 'investigation' %}bg-warning text-warning
+                  {% elif case.status == 'dci' %}bg-info text-info
+                  {% elif case.status == 'court' %}bg-primary text-primary
+                  {% elif case.status == 'judgement' %}bg-success text-success{% endif %}">
+                {{ case.get_status_display }}
+              </span>
+            </td>
+            <td class="text-muted">{{ case.created_at|date:"M d, Y" }}</td>
+            <td class="pe-4 text-end">
+              <a href="{% url 'case_detail' case.pk %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">View Details</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center py-5 text-muted">
+              <div class="mb-3"><i class="fas fa-folder-open fa-3x opacity-25"></i></div>
+              <p class="mb-0">You aren't tracking any cases yet.</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- RECENT ACTIVITY & UPCOMING COURT DATES -->
+<div class="row g-3 mt-4">
+  <div class="col-lg-6">
+    <div class="card card-animated border-0 shadow-sm rounded-4 h-100">
+      <div class="card-body">
+        <h5 class="fw-bold mb-3"><i class="fas fa-stream me-2 text-primary"></i>Recent Updates</h5>
+        {% if recent_notes %}
+          <div class="vstack gap-3">
+            {% for note in recent_notes %}
+            <div class="d-flex gap-3 align-items-start">
+              <div class="flex-shrink-0">
+                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                  <i class="fas fa-user-shield"></i>
+                </div>
+              </div>
+              <div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="fw-bold text-primary">{{ note.case.ob_number }}</span>
+                  <span class="badge bg-light text-muted">{{ note.case.get_status_display }}</span>
+                </div>
+                <p class="mb-1">{{ note.note|truncatechars:120 }}</p>
+                <small class="text-muted">{{ note.created_at|date:"M d, Y H:i" }}</small>
+              </div>
+            </div>
+            {% if not forloop.last %}<hr class="text-muted opacity-25 my-1">{% endif %}
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted mb-0">No recent updates yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card card-animated border-0 shadow-sm rounded-4 h-100">
+      <div class="card-body">
+        <h5 class="fw-bold mb-3"><i class="fas fa-calendar-alt me-2 text-success"></i>Upcoming Court Dates</h5>
+        {% if upcoming_court_dates %}
+        <div class="vstack gap-3">
+          {% for c in upcoming_court_dates %}
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="fw-bold text-primary">{{ c.ob_number }}</div>
+              <div class="text-muted small">{{ c.title }}</div>
+            </div>
+            <div class="text-end">
+              <div class="badge bg-primary bg-opacity-10 text-primary">{{ c.court_date|date:"M d, Y H:i" }}</div>
+            </div>
+          </div>
+          {% if not forloop.last %}<hr class="text-muted opacity-25 my-1">{% endif %}
+          {% endfor %}
+        </div>
+        {% else %}
+          <p class="text-muted mb-0">No upcoming court dates.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

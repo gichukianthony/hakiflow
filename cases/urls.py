@@ -13,4 +13,10 @@ urlpatterns = [
     path('cases/add/', views.CaseCreateView.as_view(), name='case_add'),
     path('cases/<int:pk>/edit/', views.CaseUpdateView.as_view(), name='case_edit'),
     path('cases/<int:pk>/add-note/', views.OfficerNoteCreateView.as_view(), name='add_note'),
+    
+    # Auth & Dashboard URLs
+    path('signup/', views.SignUpView.as_view(), name='signup'),
+    path('dashboard/', views.UserDashboardView.as_view(), name='user_dashboard'),
+    path('dashboard/export/', views.export_user_cases_csv, name='export_user_cases'),
+    path('notifications/', views.NotificationManagementView.as_view(), name='notification_management'),
 ]

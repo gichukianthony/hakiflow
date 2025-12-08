@@ -2,43 +2,90 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Officer Portal - Case Management</h2>
-    <a href="{% url 'case_add' %}" class="btn btn-success"><i class="fas fa-plus me-2"></i>New Case</a>
+    <div>
+        <h2 class="fw-bold">Officer Dashboard</h2>
+        <p class="text-muted">Manage cases and updates.</p>
+    </div>
+    <a href="{% url 'case_add' %}" class="btn btn-primary shadow-sm"><i class="fas fa-plus me-2"></i>New Case</a>
 </div>
-
-<div class="card shadow-sm">
-    <div class="card-body">
+<!-- Stats Cards: All Statuses -->
+<div class="row mb-4 g-3">
+    <div class="col-sm-6 col-md-3">
+        <div class="card card-animated p-3 border-0 shadow-sm rounded-4 bg-primary bg-opacity-10 text-center">
+            <div class="text-primary mb-2"><i class="fas fa-folder-open fa-lg"></i></div>
+            <div class="fw-bold h4 mb-0">{{ case_counts.total }}</div>
+            <small class="text-muted">Total Cases</small>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card card-animated p-3 border-0 shadow-sm rounded-4 bg-warning bg-opacity-10 text-center">
+            <div class="text-warning mb-2"><i class="fas fa-search fa-lg"></i></div>
+            <div class="fw-bold h4 mb-0">{{ case_counts.investigation }}</div>
+            <small class="text-muted">Investigation</small>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card card-animated p-3 border-0 shadow-sm rounded-4 bg-info bg-opacity-10 text-center">
+            <div class="text-info mb-2"><i class="fas fa-user-secret fa-lg"></i></div>
+            <div class="fw-bold h4 mb-0">{{ case_counts.dci }}</div>
+            <small class="text-muted">DCI Stage</small>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card card-animated p-3 border-0 shadow-sm rounded-4 bg-primary bg-opacity-10 text-center">
+            <div class="text-primary mb-2"><i class="fas fa-balance-scale fa-lg"></i></div>
+            <div class="fw-bold h4 mb-0">{{ case_counts.court }}</div>
+            <small class="text-muted">In Court</small>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3 mt-3 mt-md-0">
+        <div class="card card-animated p-3 border-0 shadow-sm rounded-4 bg-success bg-opacity-10 text-center">
+            <div class="text-success mb-2"><i class="fas fa-gavel fa-lg"></i></div>
+            <div class="fw-bold h4 mb-0">{{ case_counts.judgement }}</div>
+            <small class="text-muted">Judgement</small>
+        </div>
+    </div>
+</div>
+<!-- Case Table -->
+<div class="card card-animated shadow-lg-soft rounded-4 border-0 mt-4">
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-subtle-custom">
                     <tr>
-                        <th>OB Number</th>
-                        <th>Title</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                        <th>Actions</th>
+                        <th class="ps-4 py-3 border-0 rounded-start-4">OB Number</th>
+                        <th class="py-3 border-0">Title</th>
+                        <th class="py-3 border-0">Status</th>
+                        <th class="py-3 border-0">Date</th>
+                        <th class="pe-4 py-3 border-0 rounded-end-4 text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for case in cases %}
                     <tr>
-                        <td><strong>{{ case.ob_number }}</strong></td>
+                        <td class="ps-4 fw-bold text-primary">{{ case.ob_number }}</td>
                         <td>{{ case.title }}</td>
                         <td>
-                            <span class="badge bg-{% if case.status == 'judgement' %}primary{% elif case.status == 'court' %}warning{% else %}secondary{% endif %}">
+                            <span class="badge bg-opacity-10 px-3 py-2 rounded-pill
+                                {% if case.status == 'investigation' %}bg-warning text-warning
+                                {% elif case.status == 'dci' %}bg-info text-info
+                                {% elif case.status == 'court' %}bg-primary text-primary
+                                {% elif case.status == 'judgement' %}bg-success text-success{% endif %}">
                                 {{ case.get_status_display }}
                             </span>
                         </td>
-                        <td>{{ case.created_at|date:"M d, Y" }}</td>
-                        <td>
-                            <a href="{% url 'case_detail' case.pk %}" class="btn btn-sm btn-info text-white me-1"><i class="fas fa-eye"></i></a>
-                            <a href="{% url 'case_edit' case.pk %}" class="btn btn-sm btn-warning text-white me-1"><i class="fas fa-edit"></i></a>
-                            <a href="{% url 'add_note' case.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-sticky-note"></i></a>
+                        <td class="text-muted">{{ case.created_at|date:"M d, Y" }}</td>
+                        <td class="pe-4 text-end">
+                            <a href="{% url 'case_detail' case.pk %}" class="btn btn-sm btn-outline-primary rounded-pill me-1" title="View"><i class="fas fa-eye"></i></a>
+                            <a href="{% url 'case_edit' case.pk %}" class="btn btn-sm btn-outline-warning rounded-pill me-1" title="Edit"><i class="fas fa-edit"></i></a>
+                            <a href="{% url 'add_note' case.pk %}" class="btn btn-sm btn-outline-secondary rounded-pill me-1" title="Add Note"><i class="fas fa-sticky-note"></i></a>
+                            {# Uncomment for future delete support #}
+                            {# <a href="#" class="btn btn-sm btn-outline-danger rounded-pill" title="Delete"><i class="fas fa-trash"></i></a> #}
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center py-4">No cases found.</td>
+                        <td colspan="5" class="text-center py-5 text-muted">No cases found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

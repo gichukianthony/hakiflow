@@ -1,21 +1,337 @@
 {% extends 'cases/base.html' %}
+{% load static %}
 
 {% block content %}
-<div class="row justify-content-center mt-5">
-    <div class="col-md-8 text-center">
-        <h1 class="display-4 mb-3">Track Your Case</h1>
-        <p class="lead text-muted mb-5">Enter your OB Number to check the status of your case instantly.</p>
-        
-        <div class="card p-4 shadow-sm">
-            <form action="{% url 'home' %}" method="GET" class="d-flex">
-                <input type="text" name="q" class="form-control form-control-lg me-2" placeholder="Enter OB Number (e.g., OB/2025/001)" required>
-                <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-search me-2"></i>Track</button>
-            </form>
+<!-- HERO Section with video background -->
+<style>
+.hero-video-bg {
+    position: relative;
+    min-height: 455px;
+}
+.hero-video-bg video {
+    position: absolute;
+    top:0; left:0; width:100%; height:100%; object-fit:cover;
+    z-index: 0;
+    opacity: 0.25;
+    pointer-events: none;
+}
+.hero-video-bg .hero-content {
+    position: relative;
+    z-index: 1;
+}
+@media (max-width: 991px) {
+  .hero-video-bg { min-height: 330px; }
+}
+</style>
+<div class="row align-items-center justify-content-center gx-5 pt-5 pb-4 bg-primary bg-opacity-10 rounded-4 mb-5 hero-video-bg section-shell animate-rise">
+    <span class="glow-blob blob-1"></span>
+    <span class="glow-blob blob-2"></span>
+    <span class="glow-blob blob-3 d-none d-md-block"></span>
+    <video autoplay muted loop playsinline poster="{% static 'cases/hero_bg.jpg' %}" preload="auto">
+        <source src="{% static 'cases/HakiFlow_Justice_System_Visuals_Generated.mp4' %}" type="video/mp4">
+    </video>
+    <div class="col-lg-6 py-5 hero-content text-center text-lg-start animate-rise">
+        <span class="badge badge-gradient pill border-0 px-3 py-2 shadow-sm mb-3">
+            <i class="fas fa-check-circle me-1"></i> Justice. Transparency. Trust.
+        </span>
+        <h1 class="display-2 fw-bold lh-sm mb-4 floating">
+            Real-Time Justice Tracking for All <br>
+            <span class="gradient-text">HakiFlow</span>
+        </h1>
+        <p class="lead text-muted mb-4 animate-rise animate-delay-2">Monitor your case, report anonymously, and stay informed—anywhere, anytime. Bringing clarity and accountability to the justice system.</p>
+        <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start animate-rise animate-delay-3">
+            <a href="{% url 'home' %}#track" class="btn btn-primary btn-lg px-4 py-3 shadow-lg-soft">
+                <i class="fas fa-location-arrow me-2"></i>Track Your Case
+            </a>
+            <a href="{% url 'report' %}" class="btn btn-outline-secondary btn-lg px-4 py-3 shadow-sm">
+                <i class="fas fa-user-secret me-2"></i>Anonymous Report
+            </a>
         </div>
-
-        <div class="mt-5 d-flex justify-content-center gap-3">
-            <a href="{% url 'report' %}" class="btn btn-outline-danger btn-lg"><i class="fas fa-user-secret me-2"></i>Report Anonymous Crime</a>
-            <a href="{% url 'subscribe' %}" class="btn btn-outline-secondary btn-lg"><i class="fas fa-bell me-2"></i>Get Updates</a>
+    </div>
+    <div class="col-lg-5 text-center d-none d-lg-flex justify-content-center hero-content animate-rise animate-delay-2">
+        <!-- Placeholder for SVG or hero image overlay -->
+        <i class="fas fa-scale-balanced fa-8x text-primary opacity-25 floating"></i>
+    </div>
+</div>
+<!-- Quick Actions -->
+<div class="row g-4 my-4">
+    <div class="col-md-4">
+        <div class="card card-cta card-cta-blue animate-rise card-animated">
+            <div class="d-flex align-items-center gap-3">
+                <div class="icon-pill">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+                <div>
+                    <div class="eyebrow">Start here</div>
+                    <h6 class="fw-bold mb-1">Track your OB/Court number</h6>
+                    <p class="small text-muted mb-2">Instant status with every stage update.</p>
+                    <a class="text-decoration-none fw-semibold" href="{% url 'home' %}#track">Go to tracker →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-cta card-cta-green animate-rise animate-delay-2 card-animated">
+            <div class="d-flex align-items-center gap-3">
+                <div class="icon-pill">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div>
+                    <div class="eyebrow">Stay safe</div>
+                    <h6 class="fw-bold mb-1">Anonymous reporting</h6>
+                    <p class="small text-muted mb-2">Secure channel with built-in escalation.</p>
+                    <a class="text-decoration-none fw-semibold" href="{% url 'report' %}">Send a report →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-cta card-cta-purple animate-rise animate-delay-3 card-animated">
+            <div class="d-flex align-items-center gap-3">
+                <div class="icon-pill">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div>
+                    <div class="eyebrow">Never miss</div>
+                    <h6 class="fw-bold mb-1">Smart alerts & reminders</h6>
+                    <p class="small text-muted mb-2">Hear about date changes the moment they happen.</p>
+                    <a class="text-decoration-none fw-semibold" href="{% url 'home' %}#impact">See how we notify →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Search Bar Card -->
+<div class="container my-5" id="track">
+    <div class="card glass-blur p-4 shadow-lg-soft rounded-4 mx-auto text-center animate-rise" style="max-width:600px;">
+        <form action="{% url 'home' %}" method="GET" class="d-flex gap-2">
+            <input type="text" name="q" class="form-control border-0 bg-subtle-custom shadow-none" placeholder="Enter OB Number (e.g., OB/2025/001)" required style="font-size: 1.1rem;">
+            <button type="submit" class="btn btn-primary px-4">
+                <i class="fas fa-search me-2"></i>Track
+            </button>
+        </form>
+    </div>
+</div>
+<!-- Proof of trust / stats -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card stat-card p-4 animate-rise card-animated">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="chip"><i class="fas fa-signal text-primary"></i><small class="text-muted">Live</small></span>
+                <span class="stat-delta">+4.2% this week</span>
+            </div>
+            <h3 class="metric-number">12,480</h3>
+            <p class="text-muted mb-0">Active case trackers across counties</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card p-4 animate-rise animate-delay-2 card-animated">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="chip"><i class="fas fa-bell text-warning"></i><small class="text-muted">Alerts</small></span>
+                <span class="stat-delta">99.1% delivered</span>
+            </div>
+            <h3 class="metric-number">54k+</h3>
+            <p class="text-muted mb-0">Court date reminders sent to citizens</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card p-4 animate-rise animate-delay-3 card-animated">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="chip"><i class="fas fa-shield-alt text-success"></i><small class="text-muted">Safe</small></span>
+                <span class="stat-delta">24/7</span>
+            </div>
+            <h3 class="metric-number">3,200</h3>
+            <p class="text-muted mb-0">Anonymous reports triaged securely</p>
+        </div>
+    </div>
+</div>
+<!-- Feature Cards: More variety -->
+<div id="features" class="py-5 mb-5 section-shell">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold display-6">One Platform, Complete Transparency</h2>
+        <p class="text-muted lead">HakiFlow bridges the gap between citizens and justice with real-time tracking, instant notifications, and comprehensive support tools.</p>
+    </div>
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-4 col-lg-3">
+            <div class="card card-animated p-4 border-0 shadow-lg-soft rounded-4 h-100 text-center animate-rise">
+                <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px;"><i class="fas fa-search fa-lg"></i></div>
+                <h5 class="fw-bold mb-2">Case Tracking</h5>
+                <p class="text-muted small">Track your case using OB or court numbers with real-time status updates.</p>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-3">
+            <div class="card card-animated p-4 border-0 shadow-lg-soft rounded-4 h-100 text-center animate-rise animate-delay-2">
+                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px;"><i class="fas fa-bell fa-lg"></i></div>
+                <h5 class="fw-bold mb-2">Smart Alerts</h5>
+                <p class="text-muted small">Get SMS/WhatsApp notifications for court dates, case movements, and updates.</p>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-3">
+            <div class="card card-animated p-4 border-0 shadow-lg-soft rounded-4 h-100 text-center animate-rise animate-delay-3">
+                <div class="bg-secondary bg-opacity-10 text-secondary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px;"><i class="fas fa-route fa-lg"></i></div>
+                <h5 class="fw-bold mb-2">Visual Timeline</h5>
+                <p class="text-muted small">See your case journey from police to prosecution to court in one clear view.</p>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-3">
+            <div class="card card-animated p-4 border-0 shadow-lg-soft rounded-4 h-100 text-center animate-rise animate-delay-4">
+                <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px;"><i class="fas fa-comment-shield fa-lg"></i></div>
+                <h5 class="fw-bold mb-2">Safe Reporting</h5>
+                <p class="text-muted small">Anonymous tip reporting and panic button for emergencies.</p>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-3">
+            <div class="card card-animated p-4 border-0 shadow-lg-soft rounded-4 h-100 text-center animate-rise animate-delay-2">
+                <div class="bg-info bg-opacity-10 text-info rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px;"><i class="fas fa-upload fa-lg"></i></div>
+                <h5 class="fw-bold mb-2">Evidence Upload</h5>
+                <p class="text-muted small">Securely upload and track evidence with chain of custody.</p>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-3">
+            <div class="card card-animated p-4 border-0 shadow-lg-soft rounded-4 h-100 text-center animate-rise animate-delay-3">
+                <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px;"><i class="fas fa-user-friends fa-lg"></i></div>
+                <h5 class="fw-bold mb-2">Legal Support</h5>
+                <p class="text-muted small">Connect with NGOs, lawyers, and support organizations for help.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Justice Gap Section -->
+<div id="justice-gap" class="py-5 bg-subtle-custom rounded-4 mb-5 section-shell animate-rise">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold display-4">The Justice Gap in Kenya</h2>
+        <p class="text-muted">Thousands of Kenyans face a broken system where cases disappear into silence, trust erodes, and justice feels impossible.</p>
+    </div>
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-3">
+            <div class="card card-animated p-4 border-0 h-100 text-center rounded-4">
+                <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px"><i class="fas fa-file-excel fa-lg text-danger"></i></div>
+                <h6 class="fw-bold">Lost Case Files</h6>
+                <p class="small text-muted">OB numbers disappear, case files get lost, and victims lose track of their cases entirely.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-animated p-4 border-0 h-100 text-center rounded-4">
+                <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px"><i class="fas fa-clock fa-lg text-danger"></i></div>
+                <h6 class="fw-bold">Endless Delays</h6>
+                <p class="small text-muted">Court dates change without notice. Cases move between departments without communication.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-animated p-4 border-0 h-100 text-center rounded-4">
+                <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px"><i class="fas fa-exclamation-circle fa-lg text-danger"></i></div>
+                <h6 class="fw-bold">No Updates</h6>
+                <p class="small text-muted">Victims travel long distances only to find their case hasn't moved forward.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-animated p-4 border-0 h-100 text-center rounded-4">
+                <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px"><i class="fas fa-shield-alt fa-lg text-danger"></i></div>
+                <h6 class="fw-bold">Lack of Safety</h6>
+                <p class="small text-muted">GBV victims need safe reporting channels and protection throughout the justice process.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- How It Works Section (unchanged for now) -->
+<div id="how-it-works" class="py-5 bg-subtle-custom rounded-4 px-4 my-5 section-shell animate-rise">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold display-6">How It Works</h2>
+        <p class="text-muted lead">4 simple steps to transparency and peace of mind</p>
+    </div>
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="card card-animated p-4 border-0 shadow-sm text-center h-100 rounded-4 animate-rise">
+                <h1 class="fw-bold text-success mb-2">01</h1>
+                <h6 class="fw-bold">Register Your Case</h6>
+                <p class="small text-muted">Enter your OB or court case number to connect with the system.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-animated p-4 border-0 shadow-sm text-center h-100 rounded-4 animate-rise animate-delay-2">
+                <h1 class="fw-bold text-success mb-2">02</h1>
+                <h6 class="fw-bold">Track Progress</h6>
+                <p class="small text-muted">View your case moving through police → DCI → ODPP → Court stages.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-animated p-4 border-0 shadow-sm text-center h-100 rounded-4 animate-rise animate-delay-3">
+                <h1 class="fw-bold text-success mb-2">03</h1>
+                <h6 class="fw-bold">Get Updates</h6>
+                <p class="small text-muted">Receive instant notifications via SMS, WhatsApp, or email.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-animated p-4 border-0 shadow-sm text-center h-100 rounded-4 animate-rise animate-delay-4">
+                <h1 class="fw-bold text-success mb-2">04</h1>
+                <h6 class="fw-bold">Access Support</h6>
+                <p class="small text-muted">Connect with legal aid, NGOs, and emergency services when needed.</p>
+            </div>
+        </div>
+    </div>
+    <!-- Replace with timeline SVG or phone screenshot row if you have asset -->
+    <div class="row justify-content-center mt-5 g-4">
+        <div class="col-md-6 text-center">
+            <!-- Placeholder for phone/timeline image: add/remove as desired -->
+            <div class="bg-white p-4 rounded-4 shadow-sm d-inline-block animate-rise">
+                <i class="fas fa-mobile-alt fa-5x text-primary opacity-50 floating"></i>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Impact Section (unchanged) -->
+<div id="impact" class="py-5 mb-5 section-shell animate-rise">
+    <div class="row align-items-center">
+        <div class="col-md-6 order-md-2">
+            <h2 class="fw-bold display-6 mb-3">Making an Impact</h2>
+            <p class="text-muted lead mb-4">HakiFlow is dedicated to restoring trust in the justice system through technology.</p>
+            <div class="row g-3 text-center">
+                <div class="col-6">
+                    <h3 class="fw-bold text-primary display-5 floating">10k+</h3>
+                    <p class="text-muted small">Cases Tracked</p>
+                </div>
+                <div class="col-6">
+                    <h3 class="fw-bold text-primary display-5 floating">98%</h3>
+                    <p class="text-muted small">User Satisfaction</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 order-md-1">
+            <div class="p-5 bg-primary bg-opacity-10 rounded-4 text-center animate-rise card-animated">
+                <i class="fas fa-users fa-4x text-primary mb-3"></i>
+                <h4 class="fw-bold">Community First</h4>
+                <p class="text-muted mb-0">Empowering citizens with information.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Partners/Call to Build Together -->
+<div class="py-5 bg-subtle-custom rounded-4 mb-5 section-shell animate-rise">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold display-4">Let's Build This Together</h2>
+        <p class="text-muted">We're looking for partners, mentors, and supporters who believe in transparent justice for all Kenyans</p>
+    </div>
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-4">
+            <div class="card card-animated p-4 border-0 text-center rounded-4 h-100 animate-rise">
+                <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px"><i class="fas fa-city fa-lg text-success"></i></div>
+                <h6 class="fw-bold">Government Agencies</h6>
+                <p class="small text-muted">Partner with us to digitize justice tracking nationwide</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-animated p-4 border-0 text-center rounded-4 h-100 animate-rise animate-delay-2">
+                <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px"><i class="fas fa-hands-helping fa-lg text-primary"></i></div>
+                <h6 class="fw-bold">NGOs & Law Firms</h6>
+                <p class="small text-muted">Join our network to support vulnerable populations</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-animated p-4 border-0 text-center rounded-4 h-100 animate-rise animate-delay-3">
+                <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px"><i class="fas fa-handshake fa-lg text-warning"></i></div>
+                <h6 class="fw-bold">Corporate CSR</h6>
+                <p class="small text-muted">Support justice access as part of your social impact</p>
+            </div>
         </div>
     </div>
 </div>

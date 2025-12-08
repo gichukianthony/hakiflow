@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Case(models.Model):
     STATUS_CHOICES = [
@@ -14,9 +15,19 @@ class Case(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='investigation')
     court_date = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    # Optional citizen identifier used to associate cases with a registering user
+    id_number = models.CharField(max_length=50, blank=True, null=True)
 
     def __str__(self):
         return f"{self.ob_number} - {self.title}"
+
+
+class CitizenProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='citizen_profile')
+    id_number = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return f"{self.user.username} ({self.id_number})"
 
 class OfficerNote(models.Model):
     case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='notes')

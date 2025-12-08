@@ -1,0 +1,56 @@
+{% extends 'cases/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card card-animated glass-blur p-5 shadow-lg-soft rounded-4 border-0">
+            <div class="text-center mb-4">
+                <span class="badge badge-gradient pill px-3 py-2 mb-2">Welcome back</span>
+                <h3 class="fw-bold mb-1 gradient-text">Sign in to HakiFlow</h3>
+                <p class="text-muted">Access your dashboard, alerts, and case tracking.</p>
+            </div>
+            
+            <form method="POST" class="animate-rise">
+                {% csrf_token %}
+                {% if form.errors %}
+                    <div class="alert alert-danger border-0 shadow-sm mb-4">
+                        <small>Invalid username or password.</small>
+                    </div>
+                {% endif %}
+                
+                <div class="mb-3">
+                    <label class="form-label fw-medium">Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-subtle-custom border-0"><i class="fas fa-user"></i></span>
+                        <input type="text" name="username" class="form-control bg-subtle-custom border-0" placeholder="Enter your username" required>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-medium">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-subtle-custom border-0"><i class="fas fa-lock"></i></span>
+                        <input type="password" name="password" class="form-control bg-subtle-custom border-0" placeholder="Enter your password" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow-sm">Sign In</button>
+            </form>
+            
+            <div class="mt-4">
+                <div class="small text-muted d-flex align-items-center gap-2 mb-2">
+                    <i class="fas fa-shield-alt text-success"></i>
+                    <span>Encrypted login. Two-factor ready.</span>
+                </div>
+                <div class="small text-muted d-flex align-items-center gap-2">
+                    <i class="fas fa-bell text-primary"></i>
+                    <span>Get alerts the moment your case changes status.</span>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <p class="small text-muted">Don't have an account? <a href="{% url 'signup' %}" class="text-decoration-none fw-bold">Sign Up</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
