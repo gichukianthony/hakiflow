@@ -1,0 +1,12 @@
+Hi {{ user.username }},
+
+Welcome to HakiFlow!
+
+- Track your cases by OB number and get instant updates.
+- Receive court date reminders and officer notes automatically.
+- Manage your subscriptions anytime from your dashboard.
+
+If you did not sign up, you can ignore this email.
+
+– The HakiFlow Team
+

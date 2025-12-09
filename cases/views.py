@@ -8,11 +8,35 @@ from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
 from .models import Case, OfficerNote, NotificationSubscription, AnonymousReport, CitizenProfile
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 import csv
 from django.contrib.auth.decorators import login_required
+
+
+def send_case_notifications(case, subject, body):
+    """
+    Send a notification email to all subscribers of a case.
+    If email backend is not configured, silently skip to avoid crashing user flows.
+    """
+    recipients = list(NotificationSubscription.objects.filter(case=case).values_list("email", flat=True).distinct())
+    if not recipients:
+        return
+    try:
+        send_mail(
+            subject=subject,
+            message=body,
+            from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
+            recipient_list=recipients,
+            fail_silently=True,  # Avoid breaking UX if SMTP isn't configured
+        )
+    except Exception:
+        # Keep silent to avoid user-facing failures; logs can be added later
+        pass
 
 # Public Views
 
@@ -48,7 +72,7 @@ def subscribe_view(request):
         email = request.POST.get('email')
         case = Case.objects.filter(ob_number=ob_number).first()
         if case and email:
-            NotificationSubscription.objects.create(case=case, email=email)
+            NotificationSubscription.objects.get_or_create(case=case, email=email)
             messages.success(request, 'Subscribed to updates successfully.')
             return redirect('home')
         else:
@@ -57,21 +81,32 @@ def subscribe_view(request):
 
 class SignUpView(CreateView):
     class SignUpForm(UserCreationForm):
+        email = forms.EmailField(required=True, help_text="Add an email to get case alerts.")
         id_number = forms.CharField(max_length=50, required=True, help_text="Enter your ID number to link your cases.")
 
         class Meta(UserCreationForm.Meta):
             model = User
-            fields = ("username", "id_number")
+            fields = ("username", "email", "id_number")
 
     form_class = SignUpForm
     success_url = reverse_lazy('login')
     template_name = 'registration/signup.html'
 
     def form_valid(self, form):
+        # Ensure email saved on the user
+        self.object = form.save(commit=False)
+        self.object.email = form.cleaned_data.get("email", "")
+        self.object.save()
+        form.save_m2m()
         response = super().form_valid(form)
         id_number = form.cleaned_data.get('id_number')
         if id_number:
             CitizenProfile.objects.get_or_create(user=self.object, defaults={'id_number': id_number})
+        # Send welcome/test email if email provided
+        if self.object.email:
+            subject = "Welcome to HakiFlow"
+            body = render_to_string("cases/email/welcome.txt", {"user": self.object})
+            send_mail(subject, body, None, [self.object.email], fail_silently=True)
         messages.success(self.request, 'Account created successfully. Please login.')
         return response
 
@@ -190,8 +225,26 @@ class CaseUpdateView(UpdateView):
     success_url = reverse_lazy('case_list')
 
     def form_valid(self, form):
+        original = Case.objects.get(pk=self.object.pk)
         messages.success(self.request, 'Case updated successfully.')
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        case = self.object
+        subject_parts = []
+        body_parts = [f"Case {case.ob_number} - {case.title} has been updated."]
+
+        if case.status != original.status:
+            subject_parts.append("status change")
+            body_parts.append(f"New status: {case.get_status_display()}")
+        if case.court_date != original.court_date:
+            subject_parts.append("court date update")
+            new_date = case.court_date.isoformat() if case.court_date else "Removed"
+            body_parts.append(f"Court date: {new_date}")
+
+        if subject_parts:
+            subject = f"HakiFlow: {case.ob_number} {' & '.join(subject_parts)}"
+            send_case_notifications(case, subject, "\n".join(body_parts))
+
+        return response
 
 class OfficerNoteCreateView(CreateView):
     model = OfficerNote
@@ -202,7 +255,11 @@ class OfficerNoteCreateView(CreateView):
         case = get_object_or_404(Case, pk=self.kwargs['pk'])
         form.instance.case = case
         messages.success(self.request, 'Note added successfully.')
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        subject = f"HakiFlow: New note on {case.ob_number}"
+        body = f"A new note was added to case {case.ob_number} - {case.title}:\n\n{form.instance.note}"
+        send_case_notifications(case, subject, body)
+        return response
 
     def get_success_url(self):
         return reverse_lazy('case_detail', kwargs={'pk': self.kwargs['pk']})
