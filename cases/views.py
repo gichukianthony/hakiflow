@@ -106,7 +106,8 @@ class SignUpView(CreateView):
         if self.object.email:
             subject = "Welcome to HakiFlow"
             body = render_to_string("cases/email/welcome.txt", {"user": self.object})
-            send_mail(subject, body, None, [self.object.email], fail_silently=True)
+            from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None) or getattr(settings, "EMAIL_HOST_USER", None) or "no-reply@example.com"
+            send_mail(subject, body, from_email, [self.object.email], fail_silently=True)
         messages.success(self.request, 'Account created successfully. Please login.')
         return response
 
@@ -134,17 +135,18 @@ class UserDashboardView(LoginRequiredMixin, ListView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        cases = Case.objects.none()
+        pk_set = set()
         email = self.request.user.email
         if email:
             subscribed_cases = NotificationSubscription.objects.filter(email=email).values_list('case', flat=True)
-            cases = Case.objects.filter(pk__in=subscribed_cases)
-        # Add cases linked by ID number through the citizen profile
+            pk_set.update(subscribed_cases)
         profile = getattr(self.request.user, 'citizen_profile', None)
         if profile:
-            id_cases = Case.objects.filter(id_number=profile.id_number)
-            cases = cases.union(id_cases)
-        return cases
+            id_case_ids = Case.objects.filter(id_number=profile.id_number).values_list('pk', flat=True)
+            pk_set.update(id_case_ids)
+        if not pk_set:
+            return Case.objects.none()
+        return Case.objects.filter(pk__in=pk_set)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
